@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.WARN, format='%(levelname)-10s %(message)s')
 logger = logging.getLogger(__name__)
 logging.getLogger("__main__").setLevel(logging.INFO)
 
-MARKED_DIR = "MARK"
+MARKED_DIR = "MARK_1"
 INDEX = "ai_events"
 
 def main(data_path, elastic_server):

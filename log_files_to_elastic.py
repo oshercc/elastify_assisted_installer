@@ -1,6 +1,7 @@
 import os
 import json
 import glob
+import uuid
 import logging
 import argparse
 import subprocess
@@ -15,7 +16,6 @@ MARKED_DIR = "MARK"
 INDEX = "ai_events"
 
 def main(data_path, elastic_server):
-    ID_COUNTER = 0
     cluster_log_file = get_files(data_path)
     es = elasticsearch.Elasticsearch([elastic_server])
 
@@ -28,9 +28,8 @@ def main(data_path, elastic_server):
             cluster_metadata_json.update(event)
 
             logging.info("add {} to db".format(event))
-            res = es.create(index=INDEX, body=cluster_metadata_json, id=ID_COUNTER)
-            ID_COUNTER += 1
-            logging.info("index {}, result {}".format(ID_COUNTER, res['result']))
+            res = es.create(index=INDEX, body=cluster_metadata_json, id=str(uuid.uuid1()))
+            logging.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
 
 def get_cluster_events_json(path):

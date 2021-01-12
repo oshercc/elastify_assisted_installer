@@ -42,7 +42,6 @@ def flatten_metadata(cluster_metadata_json):
     for key, val in cluster_metadata_json.items():
         if isinstance(val, str) and is_json(val):
             cluster_metadata_json[key] = json.loads(val)
-    cluster_metadata_json = flatten_json(cluster_metadata_json)
     return cluster_metadata_json
 
 

@@ -16,6 +16,7 @@ MARKED_DIR = "MARK_1"
 INDEX = "ai_events"
 
 def main(data_path, elastic_server):
+    logging.info("Starting log collection to db")
     cluster_log_file = get_files(data_path)
     es = elasticsearch.Elasticsearch([elastic_server])
 

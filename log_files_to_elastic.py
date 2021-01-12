@@ -5,6 +5,7 @@ import uuid
 import logging
 import argparse
 import subprocess
+import collections
 import elasticsearch
 
 logging.basicConfig(level=logging.WARN, format='%(levelname)-10s %(message)s')
@@ -36,14 +37,18 @@ def main(data_path, elastic_server, dry_run=False):
                 logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
 
-
 def flatten_metadata(cluster_metadata_json):
-    cluster_metadata_json = flatten_json(cluster_metadata_json)
-    for key, val in cluster_metadata_json.items():
-        if isinstance(val, str) and is_json(val):
-            cluster_metadata_json[key] = json.loads(val)
-    return cluster_metadata_json
+    return flatten(cluster_metadata_json)
 
+def flatten(d, parent_key='', sep='_'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 def get_cluster_events_json(path):
     path_template = "cluster_*_events.json"
@@ -57,25 +62,6 @@ def get_cluster_metadata_json(path):
     with open(event_file_path) as json_file:
         data = json.load(json_file)
     return data
-
-
-def flatten_json(y):
-    out = {}
-
-    def flatten(x, name=''):
-        if type(x) is dict:
-            for a in x:
-                flatten(x[a], name + a + '_')
-        elif type(x) is list:
-            i = 0
-            for a in x:
-                flatten(a, name + str(i) + '_')
-                i += 1
-        else:
-            out[name[:-1]] = x
-
-    flatten(y)
-    return out
 
 def is_json(myjson):
   try:

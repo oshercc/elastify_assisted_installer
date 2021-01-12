@@ -43,6 +43,8 @@ def flatten_metadata(cluster_metadata_json):
         if isinstance(val, str) and is_json(val):
             cluster_metadata_json[key] = json.loads(val)
     cluster_metadata_json = flatten_json(cluster_metadata_json)
+    import ipdb
+    ipdb.set_trace()
     return cluster_metadata_json
 
 

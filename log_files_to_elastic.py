@@ -25,7 +25,7 @@ def main(data_path, elastic_server, dry_run=False):
     for cluster_log_path in cluster_log_file:
         cluster_events_json = get_cluster_events_json(cluster_log_path)
         cluster_metadata_json = get_cluster_metadata_json(cluster_log_path)
-        cluster_metadata_json = flatten_json(cluster_metadata_json)
+        cluster_metadata_json = flatten_metadata(cluster_metadata_json)
 
         for event in cluster_events_json:
             cluster_metadata_json.update(event)
@@ -35,6 +35,15 @@ def main(data_path, elastic_server, dry_run=False):
                 res = es.create(index=INDEX, body=cluster_metadata_json, id=str(uuid.uuid1()))
                 logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
+
+
+def flatten_metadata(cluster_metadata_json):
+    cluster_metadata_json = flatten_json(cluster_metadata_json)
+    for key, val in cluster_metadata_json.items():
+        if isinstance(val, str) and is_json(val):
+            cluster_metadata_json[key] = json.loads(val)
+    return cluster_metadata_json
+
 
 def get_cluster_events_json(path):
     path_template = "cluster_*_events.json"
@@ -67,6 +76,13 @@ def flatten_json(y):
 
     flatten(y)
     return out
+
+def is_json(myjson):
+  try:
+    json_object = json.loads(myjson)
+  except ValueError as e:
+    return False
+  return True
 
 def get_files(data_path):
     cluster_dirs = list()

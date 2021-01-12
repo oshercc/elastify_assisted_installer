@@ -2,6 +2,7 @@ import os
 import json
 import glob
 import uuid
+import process
 import logging
 import argparse
 import subprocess
@@ -28,6 +29,9 @@ def main(data_path, elastic_server, dry_run=False):
         cluster_metadata_json = get_cluster_metadata_json(cluster_log_path)
         cluster_metadata_json = flatten_metadata(cluster_metadata_json)
 
+        process_metadsata(cluster_metadata_json)
+
+
         for event in cluster_events_json:
             cluster_metadata_json.update(event)
 
@@ -36,6 +40,9 @@ def main(data_path, elastic_server, dry_run=False):
                 res = es.create(index=INDEX, body=cluster_metadata_json, id=str(uuid.uuid1()))
                 logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
+
+def process_metadsata(cluster_metadata_json):
+    process.process_metadata(cluster_metadata_json)
 
 def flatten_metadata(cluster_metadata_json):
     return flatten(cluster_metadata_json)
@@ -62,13 +69,6 @@ def get_cluster_metadata_json(path):
     with open(event_file_path) as json_file:
         data = json.load(json_file)
     return data
-
-def is_json(myjson):
-  try:
-    json_object = json.loads(myjson)
-  except ValueError as e:
-    return False
-  return True
 
 def get_files(data_path):
     cluster_dirs = list()

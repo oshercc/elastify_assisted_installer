@@ -5,32 +5,35 @@ import uuid
 import logging
 import argparse
 import subprocess
-import collections
 import elasticsearch
 
 logging.basicConfig(level=logging.WARN, format='%(levelname)-10s %(message)s')
 logger = logging.getLogger(__name__)
 logging.getLogger("__main__").setLevel(logging.INFO)
 
-MARKED_DIR = "MARK_1"
+MARKED_DIR_PREFIX = "MARK"
+VERSION = 2
 INDEX = "ai_events"
+MARKED_DIR = "{}_{}".format(MARKED_DIR_PREFIX, VERSION)
 
-def main(data_path, elastic_server):
+def main(data_path, elastic_server, dry_run=False):
     logger.info("Starting log collection to db")
     cluster_log_file = get_files(data_path)
-    es = elasticsearch.Elasticsearch([elastic_server])
+    if not dry_run:
+        es = elasticsearch.Elasticsearch([elastic_server])
 
     for cluster_log_path in cluster_log_file:
         cluster_events_json = get_cluster_events_json(cluster_log_path)
         cluster_metadata_json = get_cluster_metadata_json(cluster_log_path)
-        cluster_metadata_json = flatten(cluster_metadata_json)
+        cluster_metadata_json = flatten_json(cluster_metadata_json)
 
         for event in cluster_events_json:
             cluster_metadata_json.update(event)
 
             logger.info("add {} to db".format(event))
-            res = es.create(index=INDEX, body=cluster_metadata_json, id=str(uuid.uuid1()))
-            logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
+            if not dry_run:
+                res = es.create(index=INDEX, body=cluster_metadata_json, id=str(uuid.uuid1()))
+                logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
 
 def get_cluster_events_json(path):
@@ -47,15 +50,23 @@ def get_cluster_metadata_json(path):
     return data
 
 
-def flatten(d, parent_key='', sep='_'):
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, collections.MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
+def flatten_json(y):
+    out = {}
+
+    def flatten(x, name=''):
+        if type(x) is dict:
+            for a in x:
+                flatten(x[a], name + a + '_')
+        elif type(x) is list:
+            i = 0
+            for a in x:
+                flatten(a, name + str(i) + '_')
+                i += 1
         else:
-            items.append((new_key, v))
-    return dict(items)
+            out[name[:-1]] = x
+
+    flatten(y)
+    return out
 
 def get_files(data_path):
     cluster_dirs = list()
@@ -72,6 +83,8 @@ def log_dir_is_marked(path):
     return False
 
 def mark_dir(path):
+    for mark_path in glob.glob(os.path.join(path,MARKED_DIR_PREFIX + "*")):
+        subprocess.check_output("rm -f {}".format(mark_path), shell=True)
     subprocess.check_output("touch {}".format(os.path.join(path,MARKED_DIR)), shell=True)
     logger.info("marked path {}".format(path))
 
@@ -80,6 +93,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-elastic-server", help="elastic db address", default="")
     parser.add_argument("-dp", "--data-path", help="Path to log directories")
+    parser.add_argument("--dry-run", help="Test run", action='store_true')
     args = parser.parse_args()
 
-    main(data_path = args.data_path, elastic_server = args.elastic_server)
+    main(data_path = args.data_path, elastic_server = args.elastic_server, dry_run=args.dry_run)

@@ -16,7 +16,7 @@ MARKED_DIR = "MARK_1"
 INDEX = "ai_events"
 
 def main(data_path, elastic_server):
-    logging.info("Starting log collection to db")
+    logger.info("Starting log collection to db")
     cluster_log_file = get_files(data_path)
     es = elasticsearch.Elasticsearch([elastic_server])
 
@@ -28,9 +28,9 @@ def main(data_path, elastic_server):
         for event in cluster_events_json:
             cluster_metadata_json.update(event)
 
-            logging.info("add {} to db".format(event))
+            logger.info("add {} to db".format(event))
             res = es.create(index=INDEX, body=cluster_metadata_json, id=str(uuid.uuid1()))
-            logging.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
+            logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
 
 def get_cluster_events_json(path):
@@ -63,7 +63,7 @@ def get_files(data_path):
         if log_dir_is_marked(cluster_log_dir):
             continue
         cluster_dirs.append(cluster_log_dir)
-    logging.info("Collected files {}".format(len(cluster_dirs)))
+    logger.info("Collected files {}".format(len(cluster_dirs)))
     return cluster_dirs
 
 def log_dir_is_marked(path):
@@ -73,7 +73,7 @@ def log_dir_is_marked(path):
 
 def mark_dir(path):
     subprocess.check_output("touch {}".format(os.path.join(path,MARKED_DIR)), shell=True)
-    logging.info("marked path {}".format(path))
+    logger.info("marked path {}".format(path))
 
 if __name__ == "__main__":
 

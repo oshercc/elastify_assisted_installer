@@ -8,17 +8,9 @@ def process_metadata(json_file):
 
     for process in Process:
         try:
-            json_file = process(json_file)
+            json_file[process.__name__] = process(json_file)
         except:
             continue
-
-    if "cluster_hosts" in json_file:
-        host_jsons = json_file["cluster_hosts"]
-
-        json_file["process_hosts_count"]            = len(host_jsons)
-        json_file["process_hosts_synced_ntp_count"] = len(["*" for host in host_jsons if  "Host NTP is synced" in host['validations_info']])
-        json_file["process_cluster_ntp_synced"]     = json_file["process_hosts_count"] == json_file["process_hosts_synced_ntp_count"]
-
     return json_file
 
 def process_hosts_count(j):

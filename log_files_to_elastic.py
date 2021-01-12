@@ -29,7 +29,7 @@ def main(data_path, elastic_server, dry_run=False):
         cluster_metadata_json = get_cluster_metadata_json(cluster_log_path)
         cluster_metadata_json = flatten_metadata(cluster_metadata_json)
 
-        process_metadsata(cluster_metadata_json)
+        cluster_metadata_json = process_metadsata(cluster_metadata_json)
 
 
         for event in cluster_events_json:
@@ -42,7 +42,7 @@ def main(data_path, elastic_server, dry_run=False):
             mark_dir(cluster_log_path)
 
 def process_metadsata(cluster_metadata_json):
-    process.process_metadata(cluster_metadata_json)
+    return process.process_metadata(cluster_metadata_json)
 
 def flatten_metadata(cluster_metadata_json):
     return flatten(cluster_metadata_json)

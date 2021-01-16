@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("__main__").setLevel(logging.INFO)
 
 MARKED_DIR_PREFIX = "MARK"
-VERSION = 7
+VERSION = 8
 INDEX = "ai_events"
 MARKED_DIR = "{}_{}".format(MARKED_DIR_PREFIX, VERSION)
 

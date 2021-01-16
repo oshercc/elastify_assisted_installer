@@ -38,7 +38,7 @@ def main(data_path, elastic_server, index, dry_run=False):
             logger.info("add {} to db".format(event))
             id_ = generate_id(cluster_metadata_json)
             if not dry_run:
-                res = es.create(index=index, body=cluster_metadata_json, id=id_)
+                res = es.index(index=index, body=cluster_metadata_json, id=id_)
                 logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
 

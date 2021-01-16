@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 logging.getLogger("__main__").setLevel(logging.INFO)
 
 MARKED_DIR_PREFIX = "MARK"
-VERSION = 5
+VERSION = 6
 INDEX = "ai_events"
 MARKED_DIR = "{}_{}".format(MARKED_DIR_PREFIX, VERSION)
 
-def main(data_path, elastic_server, dry_run=False):
+def main(data_path, elastic_server, index, dry_run=False):
     logger.info("Starting log collection to db")
     cluster_log_file = get_files(data_path)
     if not dry_run:
@@ -36,10 +36,15 @@ def main(data_path, elastic_server, dry_run=False):
             cluster_metadata_json.update(event)
 
             logger.info("add {} to db".format(event))
+            id_ = generate_id(cluster_metadata_json)
             if not dry_run:
-                res = es.create(index=INDEX, body=cluster_metadata_json, id=str(uuid.uuid1()))
+                res = es.create(index=index, body=cluster_metadata_json, id=id_)
                 logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
             mark_dir(cluster_log_path)
+
+def generate_id(event_json):
+    _id =hash(event_json["event_time"] + event_json["cluster_id"] + event_json["message"] )
+    return str(_id)
 
 def process_metadsata(cluster_metadata_json):
     return process.process_metadata(cluster_metadata_json)
@@ -96,6 +101,7 @@ if __name__ == "__main__":
     parser.add_argument("-elastic-server", help="elastic db address", default="")
     parser.add_argument("-dp", "--data-path", help="Path to log directories")
     parser.add_argument("--dry-run", help="Test run", action='store_true')
+    parser.add_argument("-index", help="es index", default=INDEX)
     args = parser.parse_args()
 
-    main(data_path = args.data_path, elastic_server = args.elastic_server, dry_run=args.dry_run)
+    main(data_path = args.data_path, elastic_server = args.elastic_server, dry_run=args.dry_run, index=args.index )

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("__main__").setLevel(logging.INFO)
 
 MARKED_DIR_PREFIX = "MARK"
-VERSION = 9
+VERSION = 10
 INDEX = "ai_events"
 MARKED_DIR = "{}_{}".format(MARKED_DIR_PREFIX, VERSION)
 
@@ -25,17 +25,23 @@ def main(data_path, elastic_server, index, dry_run=False):
         es = elasticsearch.Elasticsearch([elastic_server])
 
     for cluster_log_path in cluster_log_file:
+
         cluster_events_json = get_cluster_events_json(cluster_log_path)
+        events_extract = process_events(cluster_events_json)
+
         cluster_metadata_json = get_cluster_metadata_json(cluster_log_path)
         cluster_metadata_json = flatten_metadata(cluster_metadata_json)
 
         cluster_metadata_json = process_metadsata(cluster_metadata_json)
+
+        cluster_metadata_json.update(events_extract)
 
         for event in cluster_events_json:
             cluster_metadata_json.update(event)
 
             logger.info("add {} to db".format(event))
             id_ = generate_id(cluster_metadata_json)
+
             if not dry_run:
                 res = es.index(index=index, body=cluster_metadata_json, id=id_)
                 logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
@@ -47,6 +53,9 @@ def generate_id(event_json):
 
 def process_metadsata(cluster_metadata_json):
     return process.process_metadata(cluster_metadata_json)
+
+def process_events(cluster_events_json):
+    return  process.process_events(cluster_events_json)
 
 def flatten_metadata(cluster_metadata_json):
     return flatten(cluster_metadata_json)

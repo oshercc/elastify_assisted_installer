@@ -1,8 +1,7 @@
 
-REMOVED_FEALDS = [
+REMOVED_FIELDS = [
     "cluster_image_info_ssh_public_key",
-    "cluster_ssh_public_key,"
-    ""
+    "cluster_ssh_public_key"
 ]
 
 def process_hosts_count(j):
@@ -11,12 +10,12 @@ def process_hosts_count(j):
 
 def process_hosts_synced_ntp_count(j):
     host_jsons = j["cluster_hosts"]
-    return  len(["*" for host in host_jsons if "Host NTP is synced" in host['validations_info']])
+    return len(["*" for host in host_jsons if "Host NTP is synced" in host['validations_info']])
 
 def process_cluster_ntp_synced(j):
-    return  j["process_hosts_count"] == j["process_hosts_synced_ntp_count"]
+    return j["process_hosts_count"] == j["process_hosts_synced_ntp_count"]
 
-def process_fields(json_file):
+def process_fields(cluster_metadata_json):
 
     process = [process_hosts_count,
                process_hosts_synced_ntp_count,
@@ -25,17 +24,17 @@ def process_fields(json_file):
 
     for process in process:
         try:
-            json_file[process.__name__] = process(json_file)
+            cluster_metadata_json[process.__name__] = process(cluster_metadata_json)
         except:
             continue
 
-def remove_customer_access_fields(json_file):
-    for remove_field in REMOVED_FEALDS:
-        json_file.pop(remove_field, None)
+def remove_customer_access_fields(j):
+    for remove_field in REMOVED_FIELDS:
+        j.pop(remove_field, None)
 
-def process_metadata(json_file):
+def process_metadata(cluster_metadata_json):
 
-    remove_customer_access_fields(json_file)
-    process_fields(json_file)
+    remove_customer_access_fields(cluster_metadata_json)
+    process_fields(cluster_metadata_json)
 
-    return json_file
+    return cluster_metadata_json

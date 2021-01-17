@@ -30,8 +30,6 @@ def main(data_path, elastic_server, index, dry_run=False):
         cluster_metadata_json = flatten_metadata(cluster_metadata_json)
 
         cluster_metadata_json = process_metadsata(cluster_metadata_json)
-        import ipdb
-        ipdb.set_trace()
 
         for event in cluster_events_json:
             cluster_metadata_json.update(event)

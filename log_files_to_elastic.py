@@ -1,9 +1,9 @@
 import os
 import json
 import glob
-import uuid
 import process
 import logging
+import hashlib
 import argparse
 import subprocess
 import collections
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("__main__").setLevel(logging.INFO)
 
 MARKED_DIR_PREFIX = "MARK"
-VERSION = 10
+VERSION = 11
 INDEX = "ai_events"
 MARKED_DIR = "{}_{}".format(MARKED_DIR_PREFIX, VERSION)
 
@@ -32,7 +32,7 @@ def main(data_path, elastic_server, index, dry_run=False):
         cluster_metadata_json = get_cluster_metadata_json(cluster_log_path)
         cluster_metadata_json = flatten_metadata(cluster_metadata_json)
 
-        cluster_metadata_json = process_metadsata(cluster_metadata_json)
+        cluster_metadata_json = process_metadata(cluster_metadata_json)
 
         cluster_metadata_json.update(events_extract)
 
@@ -44,14 +44,15 @@ def main(data_path, elastic_server, index, dry_run=False):
 
             if not dry_run:
                 res = es.index(index=index, body=cluster_metadata_json, id=id_)
-                logger.info("index {}, result {}".format(str(uuid.uuid1()), res['result']))
+                logger.info("index {}, result {}".format(INDEX, res['result']))
             mark_dir(cluster_log_path)
 
 def generate_id(event_json):
-    _id =hash(event_json["event_time"] + event_json["cluster_id"] + event_json["message"] )
+    id_str = event_json["event_time"] + event_json["cluster_id"] + event_json["message"]
+    _id = int(hashlib.md5(id_str.encode('utf-8')).hexdigest(), 16)
     return str(_id)
 
-def process_metadsata(cluster_metadata_json):
+def process_metadata(cluster_metadata_json):
     return process.process_metadata(cluster_metadata_json)
 
 def process_events(cluster_events_json):

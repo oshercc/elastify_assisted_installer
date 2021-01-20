@@ -1,7 +1,7 @@
 pipeline {
     agent { label 'download_all_logs' }
 
-    triggers { cron('H/30 * * * *') }
+    triggers { cron('* * * * *') }
 
     environment {
         ELASTIC_HOST = credentials('elastic_host')
@@ -10,7 +10,7 @@ pipeline {
 
     }
     options {
-      timeout(time: 30, unit: 'MINUTES')
+      timeout(time: 2, unit: 'HOURS')
     }
 
     stages {
@@ -21,13 +21,13 @@ pipeline {
         }
     }
 
-//     post {
-//         failure {
-//             script {
-//                 def data = [text: "Attention! ${BUILD_TAG} job failed, see: ${BUILD_URL}"]
-//                 writeJSON(file: 'data.txt', json: data, pretty: 4)
-//             }
-//             sh '''curl -X POST -H 'Content-type: application/json' --data-binary "@data.txt"  https://hooks.slack.com/services/${SLACK_TOKEN}'''
-//         }
-//     }
+    post {
+        failure {
+            script {
+                def data = [text: "Attention! ${BUILD_TAG} job failed, see: ${BUILD_URL}"]
+                writeJSON(file: 'data.txt', json: data, pretty: 4)
+            }
+            sh '''curl -X POST -H 'Content-type: application/json' --data-binary "@data.txt"  https://hooks.slack.com/services/${SLACK_TOKEN}'''
+        }
+    }
 }

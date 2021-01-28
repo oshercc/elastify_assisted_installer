@@ -4,7 +4,7 @@ pipeline {
     triggers { cron('* * * * *') }
 
     environment {
-        ELASTIC_HOST = credentials('elastic_host')
+        ELASTIC_IP = credentials('elastic_ip')
         LOGS_LOCATION = "../collect_all_prodoction_logs/build/"
         SLACK_TOKEN = credentials('slack-token')
 
@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Log files') {
             steps{
-               sh "python3 log_files_to_elastic.py -elastic-server ${ELASTIC_HOST} --data-path ${LOGS_LOCATION}"
+               sh "python3 log_files_to_elastic.py -elastic-server ${ELASTIC_IP} --data-path ${LOGS_LOCATION}"
             }
         }
     }

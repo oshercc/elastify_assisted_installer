@@ -24,7 +24,7 @@ services:
     environment:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=MyPassword
+      - ELASTICSEARCH_PASSWORD=love
     ports:
       - "5601:5601"
     networks:

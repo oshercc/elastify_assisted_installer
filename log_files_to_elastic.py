@@ -22,7 +22,7 @@ def main(data_path, elastic_server, index, dry_run=False):
     logger.info("Starting log collection to db")
     cluster_log_file = get_files(data_path)
     if not dry_run:
-        es = elasticsearch.Elasticsearch([elastic_server])
+        es = elasticsearch.Elasticsearch([elastic_server], http_auth=("elastic", "love"))
 
     for cluster_log_path in cluster_log_file:
 

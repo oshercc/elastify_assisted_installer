@@ -7,6 +7,7 @@ services:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms30g -Xmx30g"
       - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=love
     ulimits:
       memlock:
         soft: -1
@@ -22,6 +23,8 @@ services:
     container_name: kibana
     environment:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=MyPassword
     ports:
       - "5601:5601"
     networks:

@@ -5,7 +5,7 @@ pipeline {
 
     environment {
         ELASTIC_IP = credentials('elastic_ip')
-        LOGS_LOCATION = "../collect_all_prodoction_logs/build/"
+        LOGS_LOCATION = "/var/ai-logs/"
         SLACK_TOKEN = credentials('slack-token')
 
     }

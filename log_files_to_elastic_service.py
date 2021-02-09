@@ -22,7 +22,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--bootstrap', default=KAFKA_BOOTSTRAP_SERVER)
     parser.add_argument('-c', '--cacert', default=DATA_HUB_KAFKA_CA)
-    parser.add_argument('-t', '--topic', required=True)
     parser.add_argument('-p', '--payload')
     args = parser.parse_args()
 

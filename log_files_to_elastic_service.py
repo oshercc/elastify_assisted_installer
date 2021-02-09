@@ -55,8 +55,8 @@ def main():
                 cluster_metadata_json.update(event)
 
                 logger.info("add {} to db".format(event))
-                id_ = generate_id(cluster_metadata_json)
-                cluster_metadata_json.update(id_)
+                # id_ = generate_id(cluster_metadata_json)
+                # cluster_metadata_json.update(id_)
 
                 producer.send(INDEX, cluster_metadata_json.encode('utf-8'))
                 producer.flush()  # Important, especially if message size is small

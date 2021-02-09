@@ -8,7 +8,7 @@ from kafka import KafkaProducer
 KAFKA_BOOTSTRAP_SERVER = 'kafka.datahub.redhat.com:443'
 DATA_HUB_KAFKA_CA = 'kafka/data-hub-kafka-ca.crt'
 
-MARKED_DIR_PREFIX = "MARK_PUBLIC"
+MARKED_DIR_PREFIX = "RH_ES_M"
 VERSION = 1
 INDEX = "dynamic-assisted-service-events"
 MARKED_DIR = "{}_{}".format(MARKED_DIR_PREFIX, VERSION)

@@ -58,9 +58,9 @@ def main():
                 # id_ = generate_id(cluster_metadata_json)
                 # cluster_metadata_json.update(id_)
                 if isinstance(cluster_metadata_json, dict):
-                    cluster_metadata_json = json.dumps(cluster_metadata_json)
+                    cluster_metadata_json_str = json.dumps(cluster_metadata_json)
 
-                producer.send(INDEX, cluster_metadata_json.encode('utf-8'))
+                producer.send(INDEX, cluster_metadata_json_str.encode('utf-8'))
                 producer.flush()  # Important, especially if message size is small
 
                 mark_dir(cluster_log_path)

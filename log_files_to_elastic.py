@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.WARN, format='%(levelname)-10s %(message)s')
 logger = logging.getLogger(__name__)
 logging.getLogger("__main__").setLevel(logging.INFO)
 
-MARKED_DIR_PREFIX = "ELASTIC_READ_FLAG"
+MARKED_DIR_PREFIX = "RH_ES_M"
 VERSION = 14
 INDEX = "ai_events"
 MARKED_DIR = "{}_{}".format(MARKED_DIR_PREFIX, VERSION)

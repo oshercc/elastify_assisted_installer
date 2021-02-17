@@ -27,6 +27,9 @@ def main(data_path, elastic_server, index, dry_run=False):
     for cluster_log_path in cluster_log_file:
 
         cluster_events_json = get_cluster_events_json(cluster_log_path)
+        if not cluster_events_json:
+            logger.error(f"cluster {cluster_log_path} has no events")
+            continue
         events_extract = process_events(cluster_events_json)
 
         cluster_metadata_json = get_cluster_metadata_json(cluster_log_path)
@@ -73,7 +76,11 @@ def flatten(d, parent_key='', sep='_'):
 
 def get_cluster_events_json(path):
     path_template = "cluster_*_events.json"
-    event_file = glob.glob(os.path.join(path, path_template))[0]
+    event_file_paths = glob.glob(os.path.join(path, path_template))
+    if not event_file_paths:
+        return None
+    else:
+        event_file = event_file_paths[0]
     with open(event_file) as json_file:
         data = json.load(json_file)
     return data
